@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MedCare" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1B4F72</item>
+        <item name="colorPrimaryVariant">#154360</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#27AE60</item>
+        <item name="android:statusBarColor">#154360</item>
+        <item name="android:windowBackground">#EBF0F5</item>
+    </style>
+
+    <style name="Theme.MedCare.Alarm" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">#1B4F72</item>
+        <item name="android:statusBarColor">#1B4F72</item>
+        <item name="android:navigationBarColor">#1B4F72</item>
+    </style>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#1B4F72"
+    android:padding="40dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="💊"
+        android:textSize="80sp"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tvAlarmTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="복약 시간입니다"
+        android:textSize="32sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/tvAlarmMedName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="28sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvAlarmDosage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="22sp"
+        android:textColor="#B0C4DE"
+        android:layout_marginBottom="60dp" />
+
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="280dp"
+        android:layout_height="80dp"
+        android:text="확인"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:backgroundTint="#27AE60"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>

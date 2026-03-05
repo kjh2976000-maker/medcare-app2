@@ -14,8 +14,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.medcare.pillreminder.data.DataStore
@@ -29,11 +27,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(android.R.layout.activity_list_item)
 
         alarmHelper = AlarmHelper(this)
-
-        // 알람 권한 요청
         requestAlarmPermissions()
 
         webView = WebView(this)
@@ -48,17 +43,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestAlarmPermissions() {
-        // 알림 권한 (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) 
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1
-                )
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
             }
         }
-
-        // 정확한 알람 권한 (Android 12+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -83,8 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun getMedications(): String {
-            val meds = dataStore.loadMedications()
-            return Gson().toJson(meds)
+            return Gson().toJson(dataStore.loadMedications())
         }
 
         @JavascriptInterface
@@ -95,9 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
-        fun isNativeApp(): Boolean {
-            return true
-        }
+        fun isNativeApp(): Boolean = true
     }
 
     override fun onBackPressed() {

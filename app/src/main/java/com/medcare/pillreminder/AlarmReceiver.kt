@@ -11,67 +11,64 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
 class AlarmReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
-        val medName = intent.getStringExtra("med_name") ?: "약"
+        val medName = intent.getStringExtra("med_name") ?: ""
         val medDosage = intent.getStringExtra("med_dosage") ?: ""
         val medId = intent.getStringExtra("med_id") ?: "0"
         val isAdvance = intent.getBooleanExtra("is_advance", false)
         val isRepeat = intent.getBooleanExtra("is_repeat", false)
 
         val title = when {
-            isAdvance -> "⏰ 10분 후 복약 시간"
-            isRepeat -> "❗ 아직 약을 안 드셨어요"
-            else -> "💊 복약 시간입니다"
+            isAdvance -> "💊 약 복용 30분 전입니다"
+            isRepeat -> "⏰ 아직 약을 드셨나요?"
+            else -> "💊 약 복용 시간입니다"
         }
 
         val body = if (medDosage.isNotEmpty()) {
-            "$medName - $medDosage"
+            "$medName $medDosage"
         } else {
             medName
         }
 
-        // Vibrate
+        // 진동
         try {
-            val vibrator = if (android.os.Build.VERSION.SDK_INT >= 31) {
-                val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vm.defaultVibrator
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 500, 100, 500, 100, 500), -1))
             } else {
                 @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(longArrayOf(0, 500, 100, 500, 100, 500), -1)
             }
-            vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 300, 100, 300, 100, 300), -1))
-        } catch (_: Exception) {}
-
-        // Open app intent
-        val openIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        val pendingOpen = PendingIntent.getActivity(
-            context, medId.hashCode(), openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
 
-        // Full screen intent for lock screen
+        // 알림
         val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
             putExtra("med_name", medName)
             putExtra("med_dosage", medDosage)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
+
         val fullScreenPending = PendingIntent.getActivity(
-            context, medId.hashCode() + 1000, fullScreenIntent,
+            context, medId.hashCode() * 1000, fullScreenIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification = NotificationCompat.Builder(context, MedCareApp.CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setContentIntent(pendingOpen)
+            .setContentIntent(fullScreenPending)
             .setFullScreenIntent(fullScreenPending, true)
-            .setVibrate(longArrayOf(0, 300, 100, 300, 100, 300))
+            .setVibrate(longArrayOf(0, 500, 100, 500, 100, 500))
             .setDefaults(NotificationCompat.DEFAULT_SOUND)
             .build()
 

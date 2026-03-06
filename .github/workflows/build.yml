@@ -35,7 +35,11 @@ jobs:
 
   build-release-aab:
     runs-on: ubuntu-latest
-    if: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.STORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' }}
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -47,10 +51,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Check secrets
+        shell: bash
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Required secrets are missing."
+            exit 1
+          fi
+
       - name: Decode Keystore
         shell: bash
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\r\n ' | base64 --decode > app/keystore.jks
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > app/keystore.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -58,9 +70,9 @@ jobs:
       - name: Build Release AAB
         run: ./gradlew bundleRelease
         env:
-          SIGNING_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: $STORE_PASSWORD
+          SIGNING_KEY_ALIAS: $KEY_ALIAS
+          SIGNING_KEY_PASSWORD: $KEY_PASSWORD
 
       - name: Upload Release AAB
         uses: actions/upload-artifact@v4

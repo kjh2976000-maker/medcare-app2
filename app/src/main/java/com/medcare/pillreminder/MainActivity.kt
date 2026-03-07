@@ -1,9 +1,13 @@
 package com.medcare.pillreminder
 
 import android.Manifest
+import android.app.AlarmManager
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
 import android.widget.TimePicker
 import android.widget.Toast
@@ -22,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         requestNotificationPermission()
+        requestExactAlarmPermission()
 
         val timePicker = findViewById<TimePicker>(R.id.timePicker)
         val btnSave = findViewById<Button>(R.id.btnSave)
@@ -31,7 +36,8 @@ class MainActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             val hour = timePicker.hour
             val minute = timePicker.minute
-            AlarmHelper(this).scheduleAlarm(hour, minute)
+            val helper = AlarmHelper(this)
+            helper.scheduleAlarm(hour, minute)
             Toast.makeText(
                 this,
                 "${hour}시 ${minute}분 알람이 설정되었습니다",
@@ -52,6 +58,18 @@ class MainActivity : AppCompatActivity() {
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     PERMISSION_REQUEST_CODE
                 )
+            }
+        }
+    }
+
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
             }
         }
     }

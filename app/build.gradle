@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.medcare.pillreminder'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.medcare.pillreminder"
         minSdk 26
-        targetSdk 34
+        targetSdk 35
 versionCode 6
 versionName "1.1.1"
     }

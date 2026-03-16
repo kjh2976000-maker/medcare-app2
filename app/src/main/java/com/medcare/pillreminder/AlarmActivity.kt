@@ -2,6 +2,7 @@ package com.medcare.pillreminder
 
 import android.app.KeyguardManager
 import android.app.NotificationManager
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
@@ -58,20 +59,17 @@ class AlarmActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnConfirm).setOnClickListener {
             stopAlarm()
-            // 알림도 제거
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.cancelAll()
             finish()
         }
 
         startAlarm()
-
-        // 10분 후 자동 종료
         handler.postDelayed(autoStopRunnable, 10 * 60 * 1000)
     }
 
     private fun startAlarm() {
-        // 알람 소리 재생 (루프)
+        // 알람 소리 재생
         try {
             val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
@@ -91,17 +89,26 @@ class AlarmActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        // 진동 (반복)
+        // 진동 반복
         try {
-            vibrator = if (Build.VERSION.SDK_INT >= 31) {
-                val vm = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vm = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
                 vm.defaultVibrator
             } else {
                 @Suppress("DEPRECATION")
-                getSystemService(VIBRATOR_SERVICE) as Vibrator
+                getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             }
-            val pattern = longArrayOf(0, 500, 500, 500, 500, 500)
-            vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // 0.5초 진동, 0.5초 쉬고 반복
+                val pattern = longArrayOf(0, 500, 500)
+                val effect = VibrationEffect.createWaveform(pattern, 0)
+                vibrator?.vibrate(effect)
+            } else {
+                @Suppress("DEPRECATION")
+                val pattern = longArrayOf(0, 500, 500)
+                vibrator?.vibrate(pattern, 0)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

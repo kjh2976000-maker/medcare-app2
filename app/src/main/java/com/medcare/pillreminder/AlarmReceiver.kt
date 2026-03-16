@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -13,7 +14,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val medDosage = intent.getStringExtra("med_dosage") ?: ""
         val medId = intent.getStringExtra("med_id") ?: "1"
 
-        // AlarmActivity 직접 실행 (전체화면 알람)
+        // AlarmActivity 실행 Intent
         val alarmIntent = Intent(context, AlarmActivity::class.java).apply {
             putExtra("med_name", medName)
             putExtra("med_dosage", medDosage)
@@ -21,24 +22,23 @@ class AlarmReceiver : BroadcastReceiver() {
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
-        context.startActivity(alarmIntent)
 
-        // 알림도 함께 표시
-        val openIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        val pendingOpen = PendingIntent.getActivity(
-            context, medId.hashCode(), openIntent,
+        val fullScreenPending = PendingIntent.getActivity(
+            context,
+            medId.hashCode() + 1000,
+            alarmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
+        val openIntent = Intent(context, AlarmActivity::class.java).apply {
             putExtra("med_name", medName)
             putExtra("med_dosage", medDosage)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val fullScreenPending = PendingIntent.getActivity(
-            context, medId.hashCode() + 1000, fullScreenIntent,
+        val pendingOpen = PendingIntent.getActivity(
+            context,
+            medId.hashCode(),
+            openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -48,13 +48,22 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentText(if (medDosage.isNotEmpty()) "$medName - $medDosage" else medName)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
+            .setAutoCancel(false)
+            .setOngoing(true)
             .setContentIntent(pendingOpen)
             .setFullScreenIntent(fullScreenPending, true)
-            .setOngoing(true)
+            .setVibrate(longArrayOf(0, 500, 500, 500, 500, 500))
+            .setDefaults(NotificationCompat.DEFAULT_SOUND)
             .build()
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(medId.hashCode(), notification)
+
+        // Android 10 이상에서도 AlarmActivity 실행 시도
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            context.startActivity(alarmIntent)
+        } else {
+            context.startActivity(alarmIntent)
+        }
     }
 }

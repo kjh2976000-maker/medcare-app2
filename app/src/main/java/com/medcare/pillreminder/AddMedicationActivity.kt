@@ -1,6 +1,7 @@
 package com.medcare.pillreminder
 
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.medcare.pillreminder.data.DataStore
@@ -10,6 +11,8 @@ class AddMedicationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 키보드 올라올 때 화면 밀어올리기
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         setContentView(R.layout.activity_add_medication)
 
         val etName = findViewById<EditText>(R.id.etMedName)
@@ -44,7 +47,6 @@ class AddMedicationActivity : AppCompatActivity() {
             meds.add(med)
             dataStore.saveMedications(meds)
 
-            // 전체 알람 재등록
             AlarmHelper(this).scheduleAllAlarms()
 
             Toast.makeText(this, "${name} 알람 설정 완료 (${hour}시 ${minute}분)", Toast.LENGTH_LONG).show()

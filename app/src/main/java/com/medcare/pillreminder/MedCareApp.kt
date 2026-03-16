@@ -18,7 +18,14 @@ class MedCareApp : Application() {
                 CHANNEL_ID,
                 "복약 알림",
                 NotificationManager.IMPORTANCE_HIGH
-            )
+            ).apply {
+                description = "복약 알림 채널"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 500, 500, 500, 500)
+                enableLights(true)
+                setBypassDnd(true)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
         }

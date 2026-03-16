@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -59,11 +58,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(medId.hashCode(), notification)
 
-        // Android 10 이상에서도 AlarmActivity 실행 시도
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            context.startActivity(alarmIntent)
-        } else {
-            context.startActivity(alarmIntent)
-        }
+        // ✅ 수정: startActivity() 직접 호출 제거
+        // → fullScreenIntent 알림이 자동으로 AlarmActivity를 띄워줍니다
     }
 }
